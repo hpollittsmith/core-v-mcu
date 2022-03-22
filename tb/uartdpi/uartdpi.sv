@@ -31,12 +31,7 @@ module uartdpi
     );
 
    localparam CYCLES_PER_SYMBOL = FREQ/BAUD;
-   initial begin
-     $display("%m @ %0t: %s Baud = %d freq = %d ccps = %d",
-              $time, NAME, BAUD, FREQ, CYCLES_PER_SYMBOL);
-     $display("%m @ %0t: Pseudo UART is %s", $time, USEPTY ? "enabled" : "disabled");
-   end
-   
+
    import "DPI-C" function
      chandle uartdpi_create(input string name);
 
@@ -50,42 +45,80 @@ module uartdpi
      void uartdpi_write(input chandle obj, int data);
 
    chandle obj;
-   
-   initial begin
-      obj = uartdpi_create(NAME);
+
+
+   always @(posedge rst) begin
+     $display("%m @ %0t: %s Baud = %d freq = %d ccps = %d",
+              $time, NAME, BAUD, FREQ, CYCLES_PER_SYMBOL);
+     $display("%m @ %0t: Pseudo UART is %s", $time, USEPTY ? "enabled" : "disabled");
+
+     obj = uartdpi_create(NAME);
    end
 
    // TX
-   reg txactive;
-   int  txcount;
-   int  txcyccount;
+   reg       txactive;
+   int       txcount;
+   int       txcyccount;
    reg [9:0] txsymbol;
-   
+   string    command = "misc simul 1 0";
+   string    rxstr   = "";
+   reg       txcmd   = 0;
+   int       i       = 0;
+
    always_ff @(negedge clk) begin
       tx <= 1;
       if (rst) begin
-         txactive <= 0;
-	 txcount <= 0;
-	 txcyccount <= 0;
-	 txsymbol <= 0;
-      end else begin
-         if (!txactive) begin
-            if (uartdpi_can_read(obj)) begin
-               automatic int c = uartdpi_read(obj);
+         txactive   <= 0;
+         txcount    <= 0;
+         txcyccount <= 0;
+         txsymbol   <= 0;
+      end
+      else begin
+         if (USEPTY) begin
+            if (!txactive) begin
+               if (uartdpi_can_read(obj)) begin
+                  automatic int c = uartdpi_read(obj);
+                  txsymbol <= {1'b1, c[7:0], 1'b0};
+                  txactive <= 1;
+                  txcount <= 0;
+                  txcyccount <= 0;
+               end
+            end
+            else begin
+               txcyccount <= txcyccount + 1;
+               tx <= txsymbol[txcount];
+               if (txcyccount == CYCLES_PER_SYMBOL) begin
+                  txcyccount <= 0;
+                  if (txcount == 9)
+                    txactive <= 0;
+                  else
+                    txcount <= txcount + 1;
+               end
+            end
+         end
+         else begin (!USEPTY)
+            if (txcmd && !txactive) begin
+               automatic int c = command.getc(i);
                txsymbol <= {1'b1, c[7:0], 1'b0};
                txactive <= 1;
                txcount <= 0;
                txcyccount <= 0;
             end
-         end else begin
-            txcyccount <= txcyccount + 1;
-            tx <= txsymbol[txcount];
-            if (txcyccount == CYCLES_PER_SYMBOL) begin
-               txcyccount <= 0;
-               if (txcount == 9)
-                 txactive <= 0;
-               else
-                 txcount <= txcount + 1;
+            else begin
+               txcyccount <= txcyccount + 1;
+               tx <= txsymbol[txcount];
+               if (txcyccount == CYCLES_PER_SYMBOL) begin
+                  txcyccount <= 0;
+                  if (txcount == 9) begin
+                     txactive <= 0;
+                     i <= i+1;
+                     $write("%c", c);
+                     if (c == "\n") txcmd <= 0;
+                  end
+                  else begin
+                    txcount <= txcount + 1;
+                  end
+               end
             end
          end
       end
@@ -96,15 +129,15 @@ module uartdpi
    int rxcount;
    int rxcyccount;
    reg [7:0] rxsymbol;
-   
+
    always_ff @(negedge clk) begin
       rxcyccount = rxcyccount + 1;
-      
+
       if (rst) begin
-	 rxsymbol <= 0;
-         rxactive <= 0;
-	 rxcount <= 0;
-	 rxcyccount <=0;
+         rxsymbol   <= 0;
+         rxactive   <= 0;
+         rxcount    <= 0;
+         rxcyccount <= 0;
       end else begin
          if (!rxactive) begin
             if (!rx) begin
@@ -137,6 +170,8 @@ module uartdpi
                      end
                      else begin
                         $write("%c", rxsymbol);
+                        rxstr = {rxstr, rxsymbol};
+                        if (rxstr == "[0]> ") txcmd = 1;
                      end
                   end
                end
@@ -145,6 +180,5 @@ module uartdpi
          end
       end // else: !if(rst)
    end
-   
+
 endmodule
-   
