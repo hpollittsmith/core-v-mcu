@@ -4,6 +4,8 @@ After working through this document you should have a [cli_test](https://github.
 running on the CORE-V-MCU on either an FPGA based emulation platform or in simulation using Verilator.
 The emulation platform supports a simple "CLI monitor" interface over a console terminal and debug within the Eclipse IDE using OpenOCD over JTAG with the Digilent HS2 pmod adapter or the Ashling Opella-LD.
 
+CORE-V-MCU currently supports emulation on either the Nexys A7-100T or Genesys2 evaluations boards.
+
 <!---
 **Coming soon**: this QSG uses precompiled binaries available on the [OpenHW Group Downloads Page](http://downloads.openhwgroup.org/).
 --->
@@ -38,22 +40,30 @@ The free-to-use Vivado WebPACK is sufficient for working with the Nexys A7 and c
 The open-source Eclipse IDE supports CORE-V-MCU.
 
 ## Hardware Requirements:
-- Digilent [Nexys A7-100T](https://digilent.com/shop/nexys-a7-fpga-trainer-board-recommended-for-ece-curriculum/) evaulation board.
-- USB to MicroUSB cable (typically supplied with the Nexys board).
+### Evaluation Board:
+Here you have two options:
+- Digilent [Nexys A7-100T](https://digilent.com/shop/nexys-a7-fpga-trainer-board-recommended-for-ece-curriculum/), or
+- Digilent [Genesys2](https://digilent.com/reference/programmable-logic/genesys-2/reference-manual).
+
+### USB-to-JTAG PMOD:
+Again, there are two options:
 - [Digilent JTAG-H2](https://digilent.com/shop/jtag-hs2-programming-cable) Pmod.
 - [Ashling Opella-LD](https://www.ashling.com/support-opella-ld/) (if not using Digilent HS2)
+
+### Miscellaneous (but still required):
+- USB to MicroUSB cable (typically supplied with the Digilent boards).
 - [6-pin Header Gender Changer](https://digilent.com/shop/6-pin-header-gender-changer-5-pack).
 - USB drive.
 
-Optional hardware includes:
+### Optional hardware includes:
 - [5V Power supply](https://digilent.com/shop/5v-2-5a-switching-power-supply/).  Note that the Nexys can typically be powered by the MicroUSB port.
 - [NOR Flash](https://digilent.com/shop/pmod-sf3-32-mb-serial-nor-flash) Pmod.
 
 ## Emulating the CORE-V-MCU on the Nexys A7-100T
 
-Throughout this section we will refer to the circled letters on the figure below:
-
 ### Nexys A7 - Ashling Opella-LD Connection
+![Ashling Opella-LD-NexysA7 connection](NexysA7_Ashling_Opella-LD.png)
+Throughout this section we will refer to the circled letters on the figure above.
 
 #### Connecting the Opella-LD to your PC and Target
 The Ashling Opella-LD is designed to connect to your PC via the USB Port. Please note the following recommended target connection sequence
@@ -63,25 +73,26 @@ The Ashling Opella-LD is designed to connect to your PC via the USB Port. Please
 4. Power up your target.
 
 #### For Windows users
-- You will get a New USB hardware found message from Windows and will be prompted to install the appropriate USB drivers. The Ashling Opella-LD driver is located         in: Opella-LD\Opella-LD_Windows_Driver\ [Ashling Opella-LD Driver](https://www.ashling.com/wp-content/uploads/Opella-LD.zip).
-- Point the Windows Hardware Installation Wizard to your download directory so that it can locate the necessary drivers and complete the installation. Windows           only needs to perform this operation the first time you connect your Opella-LD to the PC.
-    
+- You will get a New USB hardware found message from Windows and will be prompted to install the appropriate USB drivers.
+The Ashling Opella-LD driver is located in: Opella-LD\Opella-LD_Windows_Driver\ [Ashling Opella-LD Driver](https://www.ashling.com/wp-content/uploads/Opella-LD.zip).
+- Point the Windows Hardware Installation Wizard to your download directory so that it can locate the necessary drivers and complete the installation.
+Windows only needs to perform this operation the first time you connect your Opella-LD to the PC.
+
 #### For Linux users
 - To ensure the current $USER has access to the Opella-LD device we recommend using the Linux utility udev.
 - Create a udev rules file to uniquely identify the Opella- LD device and set permissions as required by owner/ groups. An example udev file is provided:
-        Opella-LD\ Opella-LD_Linux_Rules_File\ [60-ashling.rules](https://www.ashling.com/wp-content/uploads/Opella-LD.zip) which identifies Opella-LD device (by Ashling’s USB product ID and Vendor ID).
-- The rules file must then be copied into the rules directory (requires root permission) e.g.: $ sudo cp ./60-ashling.rules /etc/udev/rules.d
-
-![Ashling Opella-LD-NexysA7 connection](NexysA7_Ashling_Opella-LD.png)
-
-
-- Connect Ashling Opella-LD to the bottom 6-pins of the JB connector. A 6- pin gender changer or flying leads can be used for this. Please make sure to match Vref of the Opella-LD and the JB connector. 
+Opella-LD\ Opella-LD_Linux_Rules_File\ [60-ashling.rules](https://www.ashling.com/wp-content/uploads/Opella-LD.zip) which identifies Opella-LD device (by Ashling’s USB product ID and Vendor ID).
+- The rules file must then be copied into the rules directory (requires root permission)
+e.g.: `$ sudo cp ./60-ashling.rules /etc/udev/rules.d`
+- Connect Ashling Opella-LD to the bottom 6-pins of the JB connector.
+A 6- pin gender changer or flying leads can be used for this.
+Please make sure to match Vref of the Opella-LD and the JB connector.
 
 Note: The connector used and the pinout can change based on the FPGA design.
 
 ### Nexys A7 - Digilent HS2 Connection
 ![image](NexysA7_annotated.png)
-
+Again, please refer to the circled letters on the figure above.
 
 
 Emulating the CORE-V-MCU on the Nexys A7-100T is a two step process:
@@ -138,7 +149,32 @@ $ minicom usb1
 
 Hit "return" a few types to get the `[0]` prompt from cli_test.
 
-## Running "cli_test" on minicom terminal:
+## Genesys2
+The steps to load the bitmap and compiled program on the Genesys2 are similar to the Nexys A7 with a few differences.
+A pre-built bitmap (`emulation/quickstart/core_v_mcu_genesys2.bit` can be found in this directory.
+Load the bitmap onto a USB drive as above and:
+- Use the cable supplied with the Genesys2 to connect the USB port configued as `dev/ttyUSB1` to the Genesys2 shared UART/JTAG USB port" (**A**).
+- Start you terminal emulator on /dev/ttyUSB1: `minicom usb1`
+- Insert the USB drive in the on-board USB port (**B**).
+- Configure the MODE straps (**C**) on the Genesys2 to load from USB (refer to the Reference Manual).
+- Power on the Nexys board.
+
+In a few moments the FPGA will enter a loop printing "A2 BOOTME" on the terminal.
+From this point forward the working with the Genesys2 board is the same as the Nexys, refer to additional instructions above.
+
+## Eclipse IDE
+The Eclipse IDE can be used to compile C programs for the CORE-V-MCU, load them into the CORE-V-MCU memory via JTAG and also provides a complete interactive debug/development environment.
+Eclipse interacts with and controls the CORE-V-MCU via a JTAG port which on the Nexys-A7 is connected to header "JB", indicated by (**C**) on the figure above.
+Connect your JTAG pmod (either HS2 or Opella-LD) as shown.
+The JTAG pmod is not keyed, so check that the pmod is connected to the bottom row of the header and that VDD on the pmod matches VDD on the board.
+
+**Note:** on the Nexys A7, the JTAG port is not enabled unless SW0 (**E**) is in the "up" position.
+
+Detailed instructions for using the Eclipse IDE with the CORE-V-MCU can be found in the [core-v-mcu-cli-test](https://github.com/openhwgroup/core-v-mcu-cli-test) repository.
+
+## Background Information
+
+### Running "cli_test" on minicom terminal:
 Below is a few examples of commands available with cli_test:
 ```
 [0] help             # list of commands
@@ -177,12 +213,3 @@ Below is a few examples of commands available with cli_test:
 | 7 nTRST | Active low JTAG TAP ReSeT. Can be controlledvia	OpenOCD	software.	See http://openocd.org/doc/html/Reset- Configuration.html      |   No connect |	
 | 8 nSRST | Active low System ReSeT. Can be controlled via OpenOCD	software.	See http://openocd.org/doc/html/Reset- Configuration.html      |   No connect |
 
-## Eclipse IDE
-The Eclipse IDE can be used to compile C programs for the CORE-V-MCU, load them into the CORE-V-MCU memory via JTAG and also provides a complete interactive debug/development environment.
-Eclipse interacts with and controls the CORE-V-MCU via a JTAG port which on the Nexys-A7 is connected to header "JB", indicated by (**C**) on the figure above.
-Connect your JTAG-HS2 pmod as shown.
-The JTAG-HS2 pmod is not keyed, so check that the pmod is connected to the bottom row of the header and that VDD on the pmod matches VDD on the board.
-
-**Note:** the JTAG port is not enabled unless SW0 (**E**) is in the "up" position.
-
-Detailed instructions for using the Eclipse IDE with the CORE-V-MCU can be found in the [core-v-mcu-cli-test](https://github.com/openhwgroup/core-v-mcu-cli-test) repository.
