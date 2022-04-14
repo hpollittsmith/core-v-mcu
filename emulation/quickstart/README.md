@@ -150,8 +150,9 @@ $ minicom usb1
 Hit "return" a few types to get the `[0]` prompt from cli_test.
 
 ## Genesys2
+![image](Genesys2_annotated.png)
 The steps to load the bitmap and compiled program on the Genesys2 are similar to the Nexys A7 with a few differences.
-A pre-built bitmap (`emulation/quickstart/core_v_mcu_genesys2.bit` can be found in this directory.
+A pre-built bitmap (`emulation/quickstart/core_v_mcu_genesys2.bit`) can be found in this directory.
 Load the bitmap onto a USB drive as above and:
 - Use the cable supplied with the Genesys2 to connect the USB port configued as `dev/ttyUSB1` to the Genesys2 shared UART/JTAG USB port" (**A**).
 - Start you terminal emulator on /dev/ttyUSB1: `minicom usb1`
@@ -160,7 +161,9 @@ Load the bitmap onto a USB drive as above and:
 - Power on the Nexys board.
 
 In a few moments the FPGA will enter a loop printing "A2 BOOTME" on the terminal.
-From this point forward the working with the Genesys2 board is the same as the Nexys, refer to additional instructions above.
+From this point forward working with the Genesys2 board is similar to the Nexys.
+Specifically, the `srec` file is the same for both.
+Refer to additional instructions in the Nexys A7 sub-sections above.
 
 ## Eclipse IDE
 The Eclipse IDE can be used to compile C programs for the CORE-V-MCU, load them into the CORE-V-MCU memory via JTAG and also provides a complete interactive debug/development environment.
