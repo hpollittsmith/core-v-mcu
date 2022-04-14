@@ -47,8 +47,8 @@ Here you have two options:
 
 ### USB-to-JTAG PMOD:
 Again, there are two options:
-- [Digilent JTAG-H2](https://digilent.com/shop/jtag-hs2-programming-cable) Pmod.
-- [Ashling Opella-LD](https://www.ashling.com/support-opella-ld/) (if not using Digilent HS2)
+- [Digilent JTAG-H2](https://digilent.com/shop/jtag-hs2-programming-cable), or
+- [Ashling Opella-LD](https://www.ashling.com/support-opella-ld/).
 
 ### Miscellaneous (but still required):
 - USB to MicroUSB cable (typically supplied with the Digilent boards).
@@ -57,7 +57,7 @@ Again, there are two options:
 
 ### Optional hardware includes:
 - [5V Power supply](https://digilent.com/shop/5v-2-5a-switching-power-supply/).  Note that the Nexys can typically be powered by the MicroUSB port.
-- [NOR Flash](https://digilent.com/shop/pmod-sf3-32-mb-serial-nor-flash) Pmod.
+- [NOR Flash](https://digilent.com/shop/pmod-sf3-32-mb-serial-nor-flash) Pmod (at least 1, ideally 2).
 
 ## Emulating the CORE-V-MCU on the Nexys A7-100T
 
@@ -151,6 +151,7 @@ Hit "return" a few types to get the `[0]` prompt from cli_test.
 
 ## Genesys2
 ![image](Genesys2_annotated.png)
+
 The steps to load the bitmap and compiled program on the Genesys2 are similar to the Nexys A7 with a few differences.
 A pre-built bitmap (`emulation/quickstart/core_v_mcu_genesys2.bit`) can be found in this directory.
 Load the bitmap onto a USB drive as above and:
